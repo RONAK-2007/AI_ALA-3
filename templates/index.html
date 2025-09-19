@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Python Chatbot</title>
+</head>
+<body style="font-family: Arial, sans-serif; background: #f4f4f9; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
+    <div id="chatbox" style="width: 400px; background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px #aaa; display: flex; flex-direction: column;">
+        <h2 style="margin: 0 0 10px 0;">🤖 Python Chatbot</h2>
+        <div id="messages" style="flex: 1; height: 350px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; border-radius: 5px; background: #fafafa; display: flex; flex-direction: column;"></div>
+        <div id="inputArea" style="display: flex;">
+            <input type="text" id="userInput" placeholder="Type a message..." 
+                   style="flex: 1; padding: 10px; border-radius: 5px; border: 1px solid #ccc;"
+                   onkeypress="if(event.key === 'Enter'){sendMessage();}" />
+            <button onclick="sendMessage()" style="margin-left: 5px; padding: 10px; border: none; background: #4CAF50; color: white; border-radius: 5px; cursor: pointer;">Send</button>
+        </div>
+    </div>
+
+    <script>
+        function sendMessage() {
+            let userInput = document.getElementById("userInput").value;
+            if (userInput.trim() === "") return;
+
+            let messages = document.getElementById("messages");
+
+            // Show user bubble (blue, right side)
+            let userBubble = document.createElement("div");
+            userBubble.textContent = userInput;
+            userBubble.style.background = "#007bff";
+            userBubble.style.color = "white";
+            userBubble.style.padding = "8px 12px";
+            userBubble.style.borderRadius = "12px";
+            userBubble.style.alignSelf = "flex-end";
+            userBubble.style.margin = "5px";
+            userBubble.style.maxWidth = "70%";
+            messages.appendChild(userBubble);
+
+            // Send to Flask backend
+            fetch("/chat", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ message: userInput })
+            })
+            .then(response => response.json())
+            .then(data => {
+                // Show bot bubble (green, left side)
+                let botBubble = document.createElement("div");
+                botBubble.textContent = data.reply;
+                botBubble.style.background = "#28a745";
+                botBubble.style.color = "white";
+                botBubble.style.padding = "8px 12px";
+                botBubble.style.borderRadius = "12px";
+                botBubble.style.alignSelf = "flex-start";
+                botBubble.style.margin = "5px";
+                botBubble.style.maxWidth = "70%";
+                messages.appendChild(botBubble);
+
+                messages.scrollTop = messages.scrollHeight;
+            });
+
+            document.getElementById("userInput").value = "";
+        }
+    </script>
+</body>
+</html>
